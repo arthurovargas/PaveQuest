@@ -30,14 +30,21 @@ def layerCoefficients(numberOfLayers, poisson, lambda_i, subtractLambdas, R, m):
     globalArray = np.array(np.zeros((unknownCoefficients, unknownCoefficients + 2)))
     globalArray[0:2, 0:4] = x_1
 
-    for i, array in enumerate(M):
+    for i in range(len(M)):
         position = i * 4 + 2
         globalArray[position:position + 4,position-2:position + 2] = M[i]
         globalArray[position:position + 4, position+2:position + 6] = N[i]
-
+    
     globalArray = np.delete(globalArray, [-2, -4], axis=1)
     resultsVector = np.array(np.zeros((unknownCoefficients, 1)))
     resultsVector[0] = 1
     coefficients = np.linalg.solve(globalArray, resultsVector)
+    coefficients = np.insert(coefficients, (-1, -2), 0)
     
-    return coefficients
+    coefficientsA = coefficients[::4]
+    numberOfCoefficients = numberOfLayers * 4
+    coefficientsB = coefficients[range(1, numberOfCoefficients, 4)]
+    coefficientsC = coefficients[range(2, numberOfCoefficients, 4)]
+    coefficientsD = coefficients[range(3, numberOfCoefficients, 4)]
+
+    return [coefficientsA, coefficientsB, coefficientsC, coefficientsD]

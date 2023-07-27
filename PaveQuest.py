@@ -12,10 +12,10 @@ class PavementResponses:
 
         number_of_layers = len(module)
         lambda_i = np.cumsum(thickness) / sum(thickness)  # lambda = zi/H
-        coefficient_r = module[0:-1] / module[1:] * ((1+poisson[1:]) / (1 + poisson[0:-1]))  # Known as R in the books
+        R = module[0:-1] / module[1:] * ((1+poisson[1:]) / (1 + poisson[0:-1]))  # Known as R in the books
 
         subtract_lambdas = np.concatenate(([lambda_i[0]], np.diff(lambda_i)))  # e^(-m(lambda_i - lambda_i-1))
-        coefficient_f = np.append(np.exp(-m * subtract_lambdas), 0)
+        F = np.append(np.exp(-m * subtract_lambdas), 0)
 
         # First layer array. z=0 sigma_z=-mJ0(m*distance_radial) y tau_rz=0
         first_layer_array = np.array(
@@ -31,25 +31,25 @@ class PavementResponses:
         for i in range(range_stop):
 
             left_array[i] = np.array(
-                [[1, coefficient_f[i], - 1 + 2 * poisson[i] + m * lambda_i[i],
-                  (1 - 2 * poisson[i] + m * lambda_i[i]) * coefficient_f[i]],
-                 [1, -coefficient_f[i], 2 * poisson[i] + m * lambda_i[i],
-                  (2 * poisson[i] - m * lambda_i[i]) * coefficient_f[i]],
-                 [1, coefficient_f[i], 1 + m * lambda_i[i], (-1 + m * lambda_i[i]) * coefficient_f[i]],
-                 [1, -coefficient_f[i], - 2 + 4 * poisson[i] + m * lambda_i[i],
-                  (- 2 + 4 * poisson[i] - m * lambda_i[i]) * coefficient_f[i]]])
+                [[1, F[i], - 1 + 2 * poisson[i] + m * lambda_i[i],
+                  (1 - 2 * poisson[i] + m * lambda_i[i]) * F[i]],
+                 [1, -F[i], 2 * poisson[i] + m * lambda_i[i],
+                  (2 * poisson[i] - m * lambda_i[i]) * F[i]],
+                 [1, F[i], 1 + m * lambda_i[i], (-1 + m * lambda_i[i]) * F[i]],
+                 [1, -F[i], - 2 + 4 * poisson[i] + m * lambda_i[i],
+                  (- 2 + 4 * poisson[i] - m * lambda_i[i]) * F[i]]])
 
             if i < range_stop:
                 right_array[i] = np.array(
-                    [[coefficient_f[i + 1], 1, (- 1 + 2 * poisson[i + 1] + m * lambda_i[i]) * coefficient_f[i + 1],
+                    [[F[i + 1], 1, (- 1 + 2 * poisson[i + 1] + m * lambda_i[i]) * F[i + 1],
                       1 - 2 * poisson[i + 1] + m * lambda_i[i]],
-                     [coefficient_f[i + 1], -1, (2 * poisson[i + 1] + m * lambda_i[i]) * coefficient_f[i + 1],
+                     [F[i + 1], -1, (2 * poisson[i + 1] + m * lambda_i[i]) * F[i + 1],
                       2 * poisson[i + 1] - m * lambda_i[i]],
-                     [coefficient_r[i] * coefficient_f[i + 1], coefficient_r[i], (1 + m * lambda_i[i]) * coefficient_r[i] * coefficient_f[i + 1],
-                      (-1 + m * lambda_i[i]) * coefficient_r[i]],
-                     [coefficient_r[i] * coefficient_f[i + 1], -coefficient_r[i],
-                      (- 2 + 4 * poisson[i + 1] + m * lambda_i[i]) * coefficient_r[i] * coefficient_f[i + 1],
-                      (- 2 + 4 * poisson[i + 1] - m * lambda_i[i]) * coefficient_r[i]]])
+                     [R[i] * F[i + 1], R[i], (1 + m * lambda_i[i]) * R[i] * F[i + 1],
+                      (-1 + m * lambda_i[i]) * R[i]],
+                     [R[i] * F[i + 1], -R[i],
+                      (- 2 + 4 * poisson[i + 1] + m * lambda_i[i]) * R[i] * F[i + 1],
+                      (- 2 + 4 * poisson[i + 1] - m * lambda_i[i]) * R[i]]])
 
         global_array = np.array(np.zeros((unknown_coefficients, unknown_coefficients + 2)))
         global_array[0:2, 0:4] = first_layer_array

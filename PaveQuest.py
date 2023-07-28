@@ -4,7 +4,7 @@ import numpy as np
 class PavementResponses:
 
     @staticmethod
-    def layer_coefficients(module, poisson, thickness, m):
+    def layer_coefficients(module: list, poisson: list, thickness: list, m: int) -> list:
 
         module = np.array(module)
         poisson = np.array(poisson)

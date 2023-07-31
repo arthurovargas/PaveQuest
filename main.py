@@ -14,4 +14,4 @@ m = 50
 fin = time.time()
 print(fin - init)
 
-print(coefficients_a, coefficients_b, coefficients_c, coefficients_d)
+print(type(coefficients_a), coefficients_b, coefficients_c, coefficients_d)

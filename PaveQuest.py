@@ -4,7 +4,7 @@ import numpy as np
 class PavementResponses:
 
     @staticmethod
-    def layer_coefficients(module: list, poisson: list, thickness: list, m: int) -> list:
+    def layer_coefficients(module: list, poisson: list, thickness: list, m: int, self=None) -> list:
 
         module = np.array(module)
         poisson = np.array(poisson)
@@ -12,7 +12,7 @@ class PavementResponses:
 
         number_of_layers = len(module)
         lambda_i = np.cumsum(thickness) / sum(thickness)  # lambda = zi/H
-        R = module[0:-1] / module[1:] * ((1+poisson[1:]) / (1 + poisson[0:-1]))  # Known as R in the books
+        R = module[0:-1] / module[1:] * ((1 + poisson[1:]) / (1 + poisson[0:-1]))  # Known as R in the books
 
         subtract_lambdas = np.concatenate(([lambda_i[0]], np.diff(lambda_i)))  # e^(-m(lambda_i - lambda_i-1))
         F = np.append(np.exp(-m * subtract_lambdas), 0)
@@ -72,3 +72,26 @@ class PavementResponses:
         coefficients_d = coefficients[range(3, number_of_coefficients, 4)]
 
         return [coefficients_a, coefficients_b, coefficients_c, coefficients_d]
+
+    @staticmethod
+    def stresses_and_displacements(self, contact_pressure: int, contact_radius: int, thickness: list, module: list,
+                                   poisson: list, horizontal_points: list, vertical_points: list) -> list:
+
+        m = np.arange(0, 50.5, 0.5)
+        m[0] = 1e-6
+
+        coefficients_a = []
+        coefficients_b = []
+        coefficients_c = []
+        coefficients_d = []
+
+        for i in range(len(m)):
+
+            coefficients_a, coefficients_b, coefficients_c, coefficients_d = self.layer_coefficients(module, poisson,
+                                                                                                     thickness, m[i])
+
+            coefficients_a.append(list(coefficients_a))
+            coefficients_b.append(list(coefficients_b))
+            coefficients_c.append(list(coefficients_c))
+            coefficients_d.append(list(coefficients_d))
+        return []
